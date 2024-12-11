@@ -5,7 +5,7 @@ exports.types = `#graphql
 
  type User {
   
-     id: ID
+     id: ID!
   firstName: String
   lastName: String
   email: String 
