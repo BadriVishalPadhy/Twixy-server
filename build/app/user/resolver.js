@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.resolver = void 0;
 const axios_1 = __importDefault(require("axios"));
 const db_1 = require("../../client/db");
+const jwt_1 = __importDefault(require("../../services/jwt"));
 const queries = {
     verifyGoogletokens: (parent_1, _a) => __awaiter(void 0, [parent_1, _a], void 0, function* (parent, { token }) {
         const googleToken = token;
@@ -34,7 +35,13 @@ const queries = {
                 }
             });
         }
-        return "ok";
+        const userInDb = yield db_1.prismaClient.user.findUnique({
+            where: { email: data.email },
+        });
+        if (!userInDb)
+            throw new Error("User with this mail not found");
+        const userToken = jwt_1.default.generateTokenForUser(userInDb);
+        return userToken;
     })
 };
 exports.resolver = { queries };

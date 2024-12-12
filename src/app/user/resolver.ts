@@ -1,5 +1,7 @@
 import axios from "axios";
 import { prismaClient } from "../../client/db";
+
+import JWTService from "../../services/jwt";
 interface GoogleAuthToken {
   iss?: string;
   azp?: string;
@@ -22,17 +24,19 @@ interface GoogleAuthToken {
 
 
 const queries = {
-  verifyGoogletokens: async (parent: any, { token }: { token: string }) => {
+  //token came from client = query VerifyUserGoogleToken($token: String!) 
+
+  verifyGoogletokens: async (parent: any, { token }: { token: string }) => {  //u will give me a user token 
     const googleToken = token;
     const googleOauthURL = new URL('https://oauth2.googleapis.com/tokeninfo')
     googleOauthURL.searchParams.set('id_token', googleToken)
 
-    const { data } = await axios.get<GoogleAuthToken>(googleOauthURL.toString(), { responseType: 'json' })
+    const { data } = await axios.get<GoogleAuthToken>(googleOauthURL.toString(), { responseType: 'json' }) //will give the data of the user 
 
-    const user = await prismaClient.user.findUnique({
+    const user = await prismaClient.user.findUnique({    //searches and checks if the user mail exists or not 
       where: { email: data.email }
     })
-
+    // if not exists then create one 
     if (!user) {
       await prismaClient.user.create({
         data: {
@@ -45,7 +49,18 @@ const queries = {
       })
     }
 
-    return "ok";
+    //from here i will create a token for the user 
+    const userInDb = await prismaClient.user.findUnique({
+      where: { email: data.email },
+    });
+
+    if (!userInDb) throw new Error("User with this mail not found")
+
+    const userToken = JWTService.generateTokenForUser(userInDb);
+
+    return userToken;
+
+
   }
 }
 
