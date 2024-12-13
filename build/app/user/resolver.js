@@ -17,14 +17,16 @@ const axios_1 = __importDefault(require("axios"));
 const db_1 = require("../../client/db");
 const jwt_1 = __importDefault(require("../../services/jwt"));
 const queries = {
+    //token came from client = query VerifyUserGoogleToken($token: String!) 
     verifyGoogletokens: (parent_1, _a) => __awaiter(void 0, [parent_1, _a], void 0, function* (parent, { token }) {
         const googleToken = token;
         const googleOauthURL = new URL('https://oauth2.googleapis.com/tokeninfo');
         googleOauthURL.searchParams.set('id_token', googleToken);
-        const { data } = yield axios_1.default.get(googleOauthURL.toString(), { responseType: 'json' });
+        const { data } = yield axios_1.default.get(googleOauthURL.toString(), { responseType: 'json' }); //will give the data of the user 
         const user = yield db_1.prismaClient.user.findUnique({
             where: { email: data.email }
         });
+        // if not exists then create one 
         if (!user) {
             yield db_1.prismaClient.user.create({
                 data: {
@@ -35,6 +37,7 @@ const queries = {
                 }
             });
         }
+        //from here i will create a token for the user 
         const userInDb = yield db_1.prismaClient.user.findUnique({
             where: { email: data.email },
         });
@@ -42,6 +45,15 @@ const queries = {
             throw new Error("User with this mail not found");
         const userToken = jwt_1.default.generateTokenForUser(userInDb);
         return userToken;
+    }),
+    getCurrentUser: (parent, args, ctx) => __awaiter(void 0, void 0, void 0, function* () {
+        var _a;
+        console.log(ctx);
+        const id = (_a = ctx.user) === null || _a === void 0 ? void 0 : _a.id;
+        if (!id)
+            return null;
+        const user = yield db_1.prismaClient.user.findUnique({ where: { id } });
+        return user;
     })
 };
 exports.resolver = { queries };
