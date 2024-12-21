@@ -20,6 +20,7 @@ const body_parser_1 = __importDefault(require("body-parser"));
 const index_1 = require("./user/index");
 const cors_1 = __importDefault(require("cors"));
 const jwt_1 = __importDefault(require("../services/jwt"));
+const index_2 = require("./tweet/index");
 function initServer() {
     return __awaiter(this, void 0, void 0, function* () {
         const app = (0, express_1.default)();
@@ -28,12 +29,18 @@ function initServer() {
         const graphqlServer = new server_1.ApolloServer({
             typeDefs: `
     ${index_1.User.types}
+    ${index_2.Tweet.types} 
+
     type Query {
    ${index_1.User.queries}
     }
+   type Mutation {
+   ${index_2.Tweet.Mutation}
+   }
     `,
             resolvers: {
                 Query: Object.assign({}, index_1.User.resolver.queries),
+                Mutation: Object.assign({}, index_2.Tweet.resolvers.Mutation)
             },
         });
         yield graphqlServer.start();

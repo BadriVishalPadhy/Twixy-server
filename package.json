@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node build/index",
     "build": "tsc -p .",
-    "dev": "tsc-watch --onSuccess \" npm start\" "
+    "dev": "tsc-watch --onSuccess \"npm start\" "
   },
   "author": "",
   "license": "ISC",

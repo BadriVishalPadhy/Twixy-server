@@ -1,4 +1,3 @@
-import { connect } from "http2";
 import { prismaClient } from "../../client/db";
 import { GraphqlContext } from "../user/interfaces";
 
@@ -7,7 +6,7 @@ interface CreateTweetPayload {
   imageURL?: string;
 }
 
-const mutations = {
+const mutation = {
   createTweet: async (
     parent: any,
     { payload }: { payload: CreateTweetPayload },
@@ -23,6 +22,7 @@ const mutations = {
     })
     return tweet;
   },
+
 };
 
-export const resolvers = { mutations }
+export const resolvers = { Mutation: mutation }
