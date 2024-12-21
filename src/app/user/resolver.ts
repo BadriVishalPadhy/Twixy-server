@@ -3,6 +3,7 @@ import { prismaClient } from "../../client/db";
 
 import JWTService from "../../services/jwt";
 import { GraphqlContext } from "./interfaces";
+import { User } from "@prisma/client";
 interface GoogleAuthToken {
   iss?: string;
   azp?: string;
@@ -75,6 +76,12 @@ const queries = {
   }
 
 
-}
+};
+const extraResolvers = {
+  User: {
+    tweets: (parent: User) => prismaClient.tweet.findMany({ where: { author: { id: parent.id } } })
+  },
+};
 
-export const resolver = { queries };
+
+export const resolver = { queries, extraResolvers };

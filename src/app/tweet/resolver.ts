@@ -1,9 +1,15 @@
+import { Tweet } from "@prisma/client";
+
 import { prismaClient } from "../../client/db";
 import { GraphqlContext } from "../user/interfaces";
 
 interface CreateTweetPayload {
   content: string;
   imageURL?: string;
+}
+
+const queries = {
+  getAllTweets: () => prismaClient.tweet.findMany({ orderBy: { createdAt: "desc" } })
 }
 
 const mutation = {
@@ -25,4 +31,12 @@ const mutation = {
 
 };
 
-export const resolvers = { Mutation: mutation }
+const extraResolvers = {
+  Tweet: {
+    author: (parent: Tweet) =>
+      prismaClient.user.findUnique({ where: { id: parent.authorId } })
+
+  }
+}
+
+export const resolvers = { mutation, extraResolvers, queries }
